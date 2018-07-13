@@ -12,14 +12,9 @@ import {
 } from "reactstrap";
 import { NavLink } from "react-router-dom"; 
 import { connect } from "react-redux";
-import Contact from "./Contact";
-import GoogleMapComponent from "./GoogleMap";
 import ScrollToTop from "./ScrollToTop";
 import LanderPage from  "./LanderPage";
-import AboutMePage from "./AboutMePage";
-import Testimonials from "./Testimonials";
-import Travel from "./TravelDiaries";
-import Connect from "./Contact";
+import DeskBooking from "./DeskBooking";
 
 //https://gist.github.com/benjaminfisher/2757473
 
@@ -29,11 +24,7 @@ class HomePage extends React.Component {
         return (
             <div>
                 <ScrollToTop />
-                <LanderPage />
-                <AboutMePage isHomePage = "true"/>
-                <Testimonials isHomePage = "true" />
-                <Travel isHomePage = "true" push = { this.props.history.push }/>
-                <Connect isHomePage = "true" />
+                <LanderPage push = {this.props.history.push}/>
             </div>
         );
     }

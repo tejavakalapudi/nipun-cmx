@@ -1,9 +1,9 @@
 import React from 'react';
 
-const LoadingPage = () => ( 
+const LoadingPage = ( props ) => ( 
 
-    <div className="loader">
-        <img className="loader__image" src= "/images/loading.gif" />
+    <div className="loader" style={{ height: props.height || "" , width: props.width || "" }}>
+        <img className="loader__image" src= "/images/loader.gif" />
     </div>
         
 );

@@ -2,18 +2,14 @@ import React from "react";
 import { checkUserAuth } from "../actions/auth";
 import { connect } from "react-redux";
 import { 
-    Button, 
-    Modal, 
-    ModalHeader, 
-    ModalBody, 
-    ModalFooter, 
+    Button,
     Container, 
     Row, 
     Col, 
     Form, 
     FormGroup, 
     FormText, 
-    Input 
+    Input
 } from "reactstrap";
 import ScrollToTop from "./ScrollToTop";
 import { NavLink } from "react-router-dom"; 
@@ -115,7 +111,7 @@ class AdminPage extends React.Component {
                     </Row>
 
                 </Container>
-                
+            
             </div>
         );
     }
