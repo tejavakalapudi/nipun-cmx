@@ -28,7 +28,13 @@ import { getAvailableDesks } from "../actions/desks";
 import { connect } from "react-redux";
 import LoadingComponent from "./LoadingPage";
 
+import DatePicker from 'react-datepicker';
+import moment from 'moment';
+import 'react-datepicker/dist/react-datepicker.css';
+
 class DeskBooking extends React.Component {
+
+    //time format to check availability format("YYYY-MM-DD HH:mm:ss");
 
     state = {
         minHeight : window.innerHeight,
@@ -119,10 +125,13 @@ class DeskBooking extends React.Component {
         currentBuildingId : "",
         currentFloor : "Select a floor",
         currentFloorId : "",
-        isFormOpen : false
+        isFormOpen : false,
+        fromTime : "",
+        toTime : "",
+        disableCheckButton : true
     }
 
-    handleEmployeeLogin = (e) => {
+    handleEmployeeLogin = ( e ) => {
 
         e.preventDefault();
         e.persist();
@@ -132,7 +141,7 @@ class DeskBooking extends React.Component {
         });
     }
 
-    handleEmployeeEmail = (e) => {
+    handleEmployeeEmail = ( e ) => {
 
         e.preventDefault();
         e.persist();
@@ -142,7 +151,7 @@ class DeskBooking extends React.Component {
         });
     }
 
-    handleEmployeePassword = (e) => {
+    handleEmployeePassword = ( e ) => {
 
         e.preventDefault();
         e.persist();
@@ -170,7 +179,7 @@ class DeskBooking extends React.Component {
 
     }
 
-    makeServiceLogin = (e) => {
+    makeServiceLogin = ( e ) => {
 
         e.preventDefault();
         e.persist();
@@ -298,9 +307,57 @@ class DeskBooking extends React.Component {
                         }
                     </ListGroup>                
                 </Col>
-                <Col xs="12" md="6" className="deskbooking__user-addbooking">
-                    <Button color="light" size="lg" className="deskbooking__button" onClick={this.toggleFormModal}>Add New Booking</Button>
-                </Col>
+
+                { 
+                    this.props.availableDesks.length === 0 && 
+                    <Col xs="12" md="6" className="deskbooking__user-addbooking">
+                        <Button color="light" size="lg" className="deskbooking__button" onClick={this.toggleFormModal}>Add New Booking</Button>
+                    </Col>
+                }
+
+                {
+                    this.props.availableDesks.length > 0 &&
+                    <Col xs="12" md="6" className="deskbooking__user-bookings">
+                        <ListGroup>
+                            <ListGroupItem className="deskbooking__myBookings-title">
+                                <ListGroupItemText>
+                                    Available Desks
+                                </ListGroupItemText>
+                            </ListGroupItem>
+                            {
+                                this.props.availableDesks.map( ( desk ) => {
+                                    return( 
+                                    <ListGroupItem>
+                                        <ListGroupItemHeading>
+                                            {`Campus Name : ${desk.campusName}, Building : ${desk.buildingName}`}
+                                        </ListGroupItemHeading>                           
+                                        <ListGroupItemText>
+                                            {`Desk ID : '${desk.deskId}', Desk Name : '${desk.deskName}', Floor : '${desk.floorName}'`}
+                                        </ListGroupItemText>
+                                        <Row className="justify-content-between">
+                                            <Col>
+                                                { desk.fromTime && 
+                                                    <small>
+                                                        From : { desk.fromTime }
+                                                    </small>                                                  
+                                                }
+                                            </Col>
+                                            <Col>
+                                                { desk.fromTime && desk.toTime &&
+                                                    <small>
+                                                        To : { desk.toTime }
+                                                    </small>
+                                                }
+                                            </Col>
+                                        </Row> 
+                                    </ListGroupItem>
+                                    )
+                                })
+                            }
+                        </ListGroup>                
+                    </Col> 
+                }
+
             </Row>
         )
 
@@ -326,9 +383,22 @@ class DeskBooking extends React.Component {
                 token : this.props.auth.sessionToken,
                 campusId : this.state.currentCampusId,
                 buildingId : this.state.currentBuildingId,
-                floorId : this.state.currentFloorId
+                floorId : this.state.currentFloorId,
+                fromTime : this.state.fromTime.format( "YYYY-MM-DD HH:mm:ss" ),
+                toTime : this.state.toTime.format( "YYYY-MM-DD HH:mm:ss" )
             }
         ));
+
+        this.setState({
+            currentCampus : "Select a campus",
+            currentCampusId : "",
+            currentBuilding : "Select a floor",
+            currentBuildingId : "",
+            currentFloor : "Select a floor",
+            currentFloorId : "",
+            fromTime : "",
+            toTime : "",
+        })
 
     }
 
@@ -405,6 +475,33 @@ class DeskBooking extends React.Component {
         
     }
 
+    onSelectFromTime = ( time ) => {
+        this.setState({
+            fromTime: time
+        });
+    }
+
+    onSelectToTime = ( time ) => {
+
+        this.setState({
+            toTime: time
+        });
+    }
+
+    componentDidUpdate( prevProps ) {
+
+        if ( this.props.availableDesks !== prevProps.availableDesks && this.props.availableDesks.length > 0 ) {
+
+            console.log("Component did update and changing state");
+
+            this.setState({
+                isFormOpen : false
+            })
+
+        }
+
+    }
+
     render(){
 
         window.addEventListener( 'resize', this.resizeDeskBookingPage );
@@ -435,7 +532,7 @@ class DeskBooking extends React.Component {
 
                 <Modal isOpen={ this.state.isFormOpen } toggle={ this.toggleFormModal } className = "modal-dialog" size="lg">
                     <ModalBody className = "mx-auto deskbooking__modal-body" >
-                        <Form onSubmit = { this.checkAvailability } className = "mx-auto deskbooking__form">
+                        <Form onSubmit = { this.checkAvailability } className = "mx-auto deskbooking__form text__align-center">
                             
                             {/*Campus Select*/}
                             <FormGroup >
@@ -505,14 +602,68 @@ class DeskBooking extends React.Component {
                                     }
                                 </Input>
                             </FormGroup>
+                            
+                            {/*From Date Select*/}
+                            <FormGroup>
+                                <FormText color="warning" className="deskbooking__form-text" >
+                                    From:
+                                </FormText>
+                                <DatePicker
+                                    utcOffset=""
+                                    selected={this.state.fromTime}
+                                    onChange={this.onSelectFromTime}
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    todayButton={"Today"}
+                                    locale="en-in"
+                                    placeholderText="Click to enter"
+                                    dateFormat="LLL"
+                                    className = "deskbooking__form-input"
+                                />
+                            </FormGroup>
 
-                            <div className = "text__align-center">
-                                <FormGroup>
-                                    <Col>
-                                        <Button color="danger" size="lg">Check Availability</Button>
-                                    </Col>
+                            {/*To Date Select*/}
+                            <FormGroup>
+                                <FormText color="warning" className="deskbooking__form-text" >
+                                    To:
+                                </FormText>
+                                <DatePicker
+                                    selected={this.state.toTime}
+                                    onChange={this.onSelectToTime}
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    todayButton={"Today"}
+                                    locale="en-in"
+                                    placeholderText="Click to enter"
+                                    dateFormat="LLL"
+                                    className = "deskbooking__form-input"
+                                />
+                            </FormGroup>
+
+                            {/*Mandatory Note*/}
+                            {
+                                ( this.state.currentCampusId === "" || this.state.fromTime === "" || this.state.toTime === "" ) &&
+                                <FormGroup>               
+                                    <FormText color="muted" >
+                                        Campus name and timings are Mandatory! 
+                                    </FormText>
                                 </FormGroup>
-                            </div>
+                            }
+                            
+                            {/*Check Button*/}
+                            <FormGroup className = "text__align-center">
+                                <Col>
+                                    <Button 
+                                        color="danger" 
+                                        size="lg"
+                                        disabled={ this.state.currentCampusId === "" || this.state.fromTime === "" || this.state.toTime === "" }
+                                    >
+                                        Check Availability
+                                    </Button>
+                                </Col>
+                            </FormGroup>
 
                         </Form> 
                     </ModalBody>
@@ -537,9 +688,24 @@ const mapStateToProps = ( store ) => {
         campuses : store.campuses,
         buildings : store.buildings,
         floors : store.floors,
-        myBookings : store.myBookings
+        myBookings : store.myBookings,
+        availableDesks : store.availableDesks
     }
 
 }
 
 export default connect( mapStateToProps )( DeskBooking );
+
+/*
+bookedBy:null
+buildingName:"Level5"
+campusName:"Ayyappa-Central"
+deskId:56
+deskName:"Desk-A1"
+floorId:"78"
+floorMap:"resources/img/Ayyappa_Central/Level5/Nipun-IT/NipunFloorIT.jpg"
+floorName:"Nipun-IT"
+fromTime:null
+toTime:null
+zonesId:"121"
+zonesName:"ConferenceRoom1"*/

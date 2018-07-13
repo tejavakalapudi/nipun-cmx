@@ -80,10 +80,22 @@
 .deskbooking__form-input{
     height: 5rem !important;
     font-size: 2rem !important;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    padding-left: 1rem;
 }
 
 .deskbooking__form-text{
     font-size: 2rem !important;
+}
+
+.react-datepicker__day{
+    width: 3rem;
+    line-height: 3rem;
+}
+
+.react-datepicker__time-list{
+    padding: 0;
 }
 
 /* Medium devices (landscape tablets, 768px and up) */
@@ -102,8 +114,7 @@
         height: 6rem;
         font-size: 3rem;
     }
-} 
-
+}
 /* Large devices and tabs (laptops/desktops, 992px and up) */
 @media only screen and (min-width: 992px) {
     .deskbooking__button{

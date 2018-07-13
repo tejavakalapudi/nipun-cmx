@@ -5,7 +5,6 @@ import { Route, Switch, withRouter } from "react-router-dom";
 
 import HomePage from "../components/HomePage";
 import NotFound from "../components/NotFoundPage";
-import AdminPage from "../components/AdminPage";
 import DeskBooking from "../components/DeskBooking";
 
 class SwitchComponent extends React.Component {

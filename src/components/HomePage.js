@@ -14,7 +14,6 @@ import { NavLink } from "react-router-dom";
 import { connect } from "react-redux";
 import ScrollToTop from "./ScrollToTop";
 import LanderPage from  "./LanderPage";
-import DeskBooking from "./DeskBooking";
 
 //https://gist.github.com/benjaminfisher/2757473
 
