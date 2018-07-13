@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Row, Container, Col, Button } from "reactstrap";
-import TCSLogo from "../../public/images/TATA_Consultancy_services_logo_blue.png";
+import TCSLogo from "../../public/images/TATA_Consultancy_Services_Logo_blue.png";
 import DeskBookingLogo from "../../public/images/201559.svg";
 import RoomBookingLogo from "../../public/images/648287.svg";
 import TicketsLogo from "../../public/images/1003902.svg";

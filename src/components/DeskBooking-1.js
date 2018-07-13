@@ -1,6 +1,6 @@
 import React from "react";
 import DeskBookingLogo from "../../public/images/201559.svg";
-import TCSLogo from "../../public/images/TATA_Consultancy_services_logo_white.png";
+import TCSLogo from "../../public/images/TATA_Consultancy_Services_Logo_white.png";
 import { 
     Row, 
     Container, 
