@@ -62,11 +62,63 @@
     font-size: 3rem;
     padding: 3rem;
     font-weight: bold;
-    color: $deskbooking-logo
+    color: $deskbooking-logo-pink;
 }
 
 .deskbooking__myBookings-title{
-    color: $deskbooking-logo
+    color: $deskbooking-logo-pink;
+}
+
+.deskbooking__myBookings-heading{
+    color: $deskbooking-logo-yellow;
+}
+
+.deskbooking__myBookings-text{
+    color: $deskbooking-logo-teal;
+}
+
+.deskbooking__myBookings-active{
+    background-color:#f7f7f7;
+    transform: scale( 1.01 );
+}
+
+.deskbooking__myBookings-footer{
+    color: $deskbooking-logo-grey;
+}
+
+.deskbooking__availableDesks-item{
+    color: $deskbooking-logo-grey;
+
+    &.active__desk{
+        border: 1px solid $deskbooking-logo-teal;
+        transform: scale( 1.01 );
+        background-color:#f7f7f7;
+    }
+
+}
+
+.deskbooking__availableDesks-heading{
+    &.active__desk{
+        color: $deskbooking-logo-yellow;
+        margin-bottom: 1rem;
+    }
+}
+
+.deskbooking__availableDesks-text{
+    &.active__desk{
+        color: $deskbooking-logo-teal;
+    }
+}
+
+.deskbooking__availableDesks-footer-text{
+    &.active__desk{
+        font-weight: bold;
+    }
+}
+
+.deskbooking__booknow-button{
+    margin-bottom: 1rem;
+    margin-top: 1.5rem;
 }
 
 .deskbooking__modal-body{
@@ -80,9 +132,10 @@
 .deskbooking__form-input{
     height: 5rem !important;
     font-size: 2rem !important;
-    border: 1px solid #ced4da;
+    border: 1px solid $deskbooking-logo-teal;
     border-radius: .25rem;
     padding-left: 1rem;
+    color: $deskbooking-logo-grey;
 }
 
 .deskbooking__form-text{
@@ -122,3 +175,17 @@
         padding: 3rem;
     }
 } 
+
+/* Just for mobile*/
+@media only screen and (max-width: 767px) {
+  
+    .deskbooking__container, .deskbooking__content-section{
+        max-height: unset !important;
+        height: unset !important;
+    }
+
+    .deskbooking__user-bookings{
+        margin-bottom: 2rem;
+    }
+
+}
