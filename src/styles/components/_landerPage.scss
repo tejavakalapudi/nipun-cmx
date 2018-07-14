@@ -2,9 +2,12 @@
     padding: 3rem 0;
 }
 
+.lander__content-container > * {
+    background-color: white !important;
+}
+
 .lander__image{
     width: 50%;
-    height: 25%;
 }
 
 .lander__room-booking{
@@ -41,6 +44,10 @@
     font-size: 0.5rem;
 }
 
+.lander__logo-container{
+    margin-bottom: 2rem;
+}
+
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 768px) {
 
@@ -73,7 +80,7 @@
     }
 
     .lander__action-iconText{
-        font-size: 2.4rem;
+        font-size: 2.2rem;
     }
     
     .lander__image{

@@ -78,9 +78,11 @@ class LanderPage extends React.Component {
             <div id="landerDiv" className = "lander__container" style={{ minHeight: this.state.minHeight }}>
 
                 <Container>
-                    <Row className="justify-content-center">
-                        <img src={TCSLogo} className="lander__image"/>
-
+                    <Row className="justify-content-center lander__content-container">
+                        <Col xs="12" className="text__align-center lander__logo-container">
+                            <img src={TCSLogo} className="lander__image"/>
+                        </Col>
+                    
                         <Coverflow
                             width={this.state.minWidth}
                             height={this.state.minHeight - 200}

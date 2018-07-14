@@ -26,6 +26,7 @@ import { connect } from "react-redux";
 import LoadingComponent from "./LoadingPage";
 import CheckAvailabilityModal from "./CheckAvailabilityModal";
 import { addDeskBooking, removeDeskBooking } from "../actions/bookings";
+import { getAvailableDesks } from "../actions/desks";
 import moment from 'moment';
 
 class DeskBooking extends React.Component {
@@ -115,11 +116,16 @@ class DeskBooking extends React.Component {
         ],
         isFormOpen : false,
         isDeleteModalOpen : false,
+        isAddModalOpen : false,
         activeIndex : 0,
         activeBookingIndex : 0,
         fromTime : "",
         toTime : "",
+        campusId : "",
+        buildingId : "",
+        floorId : "",
         itemIdToDelete : ""
+        
     }
 
     handleEmployeeLogin = ( e ) => {
@@ -213,8 +219,6 @@ class DeskBooking extends React.Component {
 
         if ( this.props.availableDesks !== prevProps.availableDesks && this.props.availableDesks.length > 0 ) {
 
-            console.log("Component did update and changing state");
-
             this.setState({
                 isFormOpen : false
             })
@@ -231,17 +235,38 @@ class DeskBooking extends React.Component {
 
     }
 
-    submitBooking = ( deskId ) => {
-
-        this.props.dispatch( addDeskBooking( this.props.auth.sessionToken, deskId, this.state.fromTime, this.state.toTime ) )
-
-    }
-
     showBookingDetails = ( id ) => {
 
         this.setState({
             activeBookingIndex : id
         })
+
+    }
+
+    toggleAddModal = () => {
+
+        this.setState({
+            isAddModalOpen : !this.state.isAddModalOpen
+        })
+
+    }
+
+    addDeskBooking = ( deskId ) => {
+
+        this.props.dispatch( addDeskBooking( this.props.auth.sessionToken, deskId, this.state.fromTime, this.state.toTime ) );
+
+        this.toggleAddModal();
+
+        this.props.dispatch( getAvailableDesks(
+            {
+                token : this.props.auth.sessionToken,
+                campusId : this.state.campusId,
+                buildingId : this.state.buildingId,
+                floorId : this.state.floorId,
+                fromTime : this.state.fromTime,
+                toTime : this.state.toTime
+            }
+        ));
 
     }
 
@@ -269,9 +294,12 @@ class DeskBooking extends React.Component {
         });
     }
 
-    saveTimings = ( fromTime, toTime ) => {
+    saveBookingInformation = ( campusId, buildingId, floorId, fromTime, toTime ) => {
 
         this.setState({
+            campusId,
+            buildingId,
+            floorId,
             fromTime,
             toTime
         })
@@ -529,7 +557,7 @@ class DeskBooking extends React.Component {
                                                                 size="sm"
                                                                 onClick = {(e) => { 
                                                                     e.preventDefault();
-                                                                    this.submitBooking( desk.deskId ); 
+                                                                    this.addDeskBooking( desk.deskId ); 
                                                                 }}
                                                             >
                                                                 Book Now
@@ -537,6 +565,21 @@ class DeskBooking extends React.Component {
                                                         </Col>
                                                     </Row>
                                                 }
+
+                                                <Modal isOpen={ this.state.isAddModalOpen } toggle={ this.toggleAddModal } className = "modal-dialog" size="sm">
+                                                    <ModalBody className = "mx-auto deskbooking__modal-body" >
+                                                        Congrats! Your booking has been completed. Please check 'My Bookings' section.
+                                                    </ModalBody>
+                                                    <ModalFooter>
+                                                        <Button 
+                                                            color="danger"
+                                                            size="sm"
+                                                            onClick = { this.toggleAddModal }
+                                                        >
+                                                            Close
+                                                        </Button>
+                                                    </ModalFooter>
+                                                </Modal>
 
                                             </ListGroupItem>
                                         )
@@ -589,7 +632,7 @@ class DeskBooking extends React.Component {
                     isOpen = { this.state.isFormOpen } 
                     toggle={ this.toggleFormModal }
                     sessionToken={ this.props.auth.sessionToken }
-                    saveTimings = { this.saveTimings }
+                    saveBookingInformation = { this.saveBookingInformation }
                 />
                 
             </div> 
