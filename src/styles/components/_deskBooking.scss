@@ -69,6 +69,10 @@
     color: $deskbooking-logo-pink;
 }
 
+.deskbooking__myBookings-title-span{
+    margin-right: 0.5rem;
+}
+
 .deskbooking__myBookings-heading{
     color: $deskbooking-logo-yellow;
 }
@@ -90,7 +94,6 @@
     color: $deskbooking-logo-grey;
 
     &.active__desk{
-        border: 1px solid $deskbooking-logo-teal;
         transform: scale( 1.01 );
         background-color:#f7f7f7;
     }

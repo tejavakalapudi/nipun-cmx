@@ -17,7 +17,8 @@ import {
     Modal,
     ModalBody,
     ModalFooter,
-    ModalHeader
+    ModalHeader,
+    Badge
 } from "reactstrap";
 import { FaAt } from "react-icons/lib/fa";
 import { MdPerson } from "react-icons/lib/md";
@@ -40,80 +41,6 @@ class DeskBooking extends React.Component {
         showEmailSection : false,
         contentMinHeight : window.innerHeight - ( 75 + 50 + 60 ),
         makingServiceLogin : false,
-        activeBookings : [
-            {
-                bookingId : "123456",
-                deskId : "Nipun-234",
-                location : "Ayappa Central",
-                bookedBy : "teja",
-                fromTime : "June 11, 10:30AM",
-                toTime : "June 11, 11:30AM"
-            },
-            {
-                bookingId : "654321",
-                deskId : "Nipun-567",
-                location : "Ayappa Central",
-                bookedBy : "teja",
-                fromTime : "June 12, 10:30AM",
-                toTime : "June 12, 11:30AM"
-            },
-            {
-                bookingId : "987654",
-                deskId : "Nipun-8789",
-                location : "Ayappa Central",
-                bookedBy : "teja",
-                fromTime : "June 13, 10:30AM",
-                toTime : "June 13, 11:30AM"
-            },
-            {
-                bookingId : "123456",
-                deskId : "Nipun-234",
-                location : "Ayappa Central",
-                bookedBy : "teja",
-                fromTime : "June 11, 10:30AM",
-                toTime : "June 11, 11:30AM"
-            },
-            {
-                bookingId : "654321",
-                deskId : "Nipun-567",
-                location : "Ayappa Central",
-                bookedBy : "teja",
-                fromTime : "June 12, 10:30AM",
-                toTime : "June 12, 11:30AM"
-            },
-            {
-                bookingId : "987654",
-                deskId : "Nipun-8789",
-                location : "Ayappa Central",
-                bookedBy : "teja",
-                fromTime : "June 13, 10:30AM",
-                toTime : "June 13, 11:30AM"
-            },
-            {
-                bookingId : "123456",
-                deskId : "Nipun-234",
-                location : "Ayappa Central",
-                bookedBy : "teja",
-                fromTime : "June 11, 10:30AM",
-                toTime : "June 11, 11:30AM"
-            },
-            {
-                bookingId : "654321",
-                deskId : "Nipun-567",
-                location : "Ayappa Central",
-                bookedBy : "teja",
-                fromTime : "June 12, 10:30AM",
-                toTime : "June 12, 11:30AM"
-            },
-            {
-                bookingId : "987654",
-                deskId : "Nipun-8789",
-                location : "Ayappa Central",
-                bookedBy : "teja",
-                fromTime : "June 13, 10:30AM",
-                toTime : "June 13, 11:30AM"
-            }
-        ],
         isFormOpen : false,
         isDeleteModalOpen : false,
         isAddModalOpen : false,
@@ -393,7 +320,11 @@ class DeskBooking extends React.Component {
                     <ListGroup>
                         <ListGroupItem className="deskbooking__myBookings-title">
                             <ListGroupItemText>
-                                My Bookings
+                                <span className="deskbooking__myBookings-title-span">My Bookings</span>
+                                { 
+                                    this.props.myBookings && 
+                                    <Badge color="secondary" pill>{this.props.myBookings.length}</Badge> 
+                                }
                             </ListGroupItemText>
                         </ListGroupItem>
 
@@ -471,32 +402,6 @@ class DeskBooking extends React.Component {
                             })
                         }
 
-                        {
-                            this.state.activeBookings.map( (activeBooking) => {
-                                return( 
-                                <ListGroupItem>
-                                    <ListGroupItemHeading className="deskbooking__myBookings-heading">
-                                        Booking ID : {activeBooking.bookingId}
-                                    </ListGroupItemHeading>                           
-                                    <ListGroupItemText className="deskbooking__myBookings-text">
-                                        {`Desk Id : ${activeBooking.deskId} at ${activeBooking.location}`}
-                                    </ListGroupItemText>
-                                    <Row className="justify-content-between deskbooking__myBookings-footer">
-                                        <Col>
-                                            <small>
-                                                From : {activeBooking.fromTime}
-                                            </small>  
-                                        </Col>
-                                        <Col>
-                                            <small>
-                                                To : {activeBooking.toTime}
-                                            </small>
-                                        </Col>
-                                    </Row> 
-                                </ListGroupItem>
-                                )
-                            })
-                        }
                     </ListGroup>                
                 </Col>
                 
@@ -515,7 +420,11 @@ class DeskBooking extends React.Component {
                             <ListGroup>
                                 <ListGroupItem className="deskbooking__myBookings-title">
                                     <ListGroupItemText>
-                                        Available Desks
+                                        <span className="deskbooking__myBookings-title-span">Available Desks</span>
+                                        { 
+                                            this.props.availableDesks && 
+                                            <Badge color="secondary" pill>{this.props.availableDesks.length}</Badge> 
+                                        }
                                     </ListGroupItemText>
                                 </ListGroupItem>
                                 {
