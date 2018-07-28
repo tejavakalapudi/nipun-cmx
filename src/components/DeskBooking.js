@@ -18,7 +18,8 @@ import {
     ModalBody,
     ModalFooter,
     ModalHeader,
-    Badge
+    Badge,
+    UncontrolledCollapse, CardBody, Card
 } from "reactstrap";
 import { FaAt } from "react-icons/lib/fa";
 import { MdPerson } from "react-icons/lib/md";
@@ -27,7 +28,7 @@ import { connect } from "react-redux";
 import LoadingComponent from "./LoadingPage";
 import CheckAvailabilityModal from "./CheckAvailabilityModal";
 import { addDeskBooking, removeDeskBooking } from "../actions/bookings";
-import { getAvailableDesks } from "../actions/desks";
+import { getAvailableDesks, arrangeDesksByCriteria } from "../actions/desks";
 import moment from 'moment';
 
 class DeskBooking extends React.Component {
@@ -44,15 +45,17 @@ class DeskBooking extends React.Component {
         isFormOpen : false,
         isDeleteModalOpen : false,
         isAddModalOpen : false,
-        activeIndex : 0,
         activeBookingIndex : 0,
         fromTime : "",
         toTime : "",
-        campusId : "",
-        buildingId : "",
-        floorId : "",
-        itemIdToDelete : ""
-        
+        selectedCampusId : "",
+        selectedBuildingId : "",
+        selectedFloorId : "",
+        itemIdToDelete : "",
+        desksByBuilding : "",
+        desksByFloors : "",
+        activeBuildingIndex : "",
+        activeIndex : 0 
     }
 
     handleEmployeeLogin = ( e ) => {
@@ -148,9 +151,18 @@ class DeskBooking extends React.Component {
 
             this.setState({
                 isFormOpen : false
-            })
+                //desksByBuilding :  arrangeDesksByCriteria( this.props.availableDesks, "buildingId" )
+            });
 
         }
+
+    }
+
+    desksByFloors = ( buildingArray ) => {
+
+        this.setState({
+            desksByFloors :  arrangeDesksByCriteria( buildingArray, "floorId" )
+        });
 
     }
 
@@ -187,9 +199,9 @@ class DeskBooking extends React.Component {
         this.props.dispatch( getAvailableDesks(
             {
                 token : this.props.auth.sessionToken,
-                campusId : this.state.campusId,
-                buildingId : this.state.buildingId,
-                floorId : this.state.floorId,
+                campusId : this.state.selectedCampusId,
+                buildingId : this.state.selectedBuildingId,
+                floorId : this.state.selectedFloorId,
                 fromTime : this.state.fromTime,
                 toTime : this.state.toTime
             }
@@ -216,21 +228,219 @@ class DeskBooking extends React.Component {
         
         this.deleteModalToggle();
 
+        this.props.dispatch( getAvailableDesks(
+            {
+                token : this.props.auth.sessionToken,
+                campusId : this.state.selectedCampusId,
+                buildingId : this.state.selectedBuildingId,
+                floorId : this.state.selectedFloorId,
+                fromTime : this.state.fromTime,
+                toTime : this.state.toTime
+            }
+        ));
+
         this.setState({
             itemIdToDelete : ""
         });
     }
 
-    saveBookingInformation = ( campusId, buildingId, floorId, fromTime, toTime ) => {
+    showDesksByBuildings = ( id ) => {
 
         this.setState({
-            campusId,
-            buildingId,
-            floorId,
+            activeBuildingIndex : id
+        })
+
+    }
+
+    saveBookingInformation = ( selectedCampusId, selectedBuildingId, selectedFloorId, fromTime, toTime ) => {
+
+        this.setState({
+            selectedCampusId,
+            selectedBuildingId,
+            selectedFloorId,
             fromTime,
             toTime
         })
     }
+
+    renderActiveBookings = () => (
+
+        <Col xs="12" md="6" className="deskbooking__user-bookings">
+            <ListGroup>
+                <ListGroupItem className="deskbooking__myBookings-title">
+                    <ListGroupItemText>
+                        <span className="deskbooking__myBookings-title-span">My Bookings</span>
+                        { 
+                            this.props.myBookings && 
+                            <Badge color="secondary" pill>{this.props.myBookings.length}</Badge> 
+                        }
+                    </ListGroupItemText>
+                </ListGroupItem>
+
+                {
+                    this.props.myBookings.map( ( booking, index ) => {
+                        
+                        return(
+                            <ListGroupItem
+                                tag="button"
+                                className={ `text__align-left ${ this.state.activeBookingIndex === index && "deskbooking__myBookings-active" }`}
+                                onClick = { () => { this.showBookingDetails( index ) } } 
+                            >
+                                <ListGroupItemHeading className="deskbooking__myBookings-heading">
+                                    Booking ID : {booking.id}
+                                </ListGroupItemHeading>                           
+                                <ListGroupItemText className="deskbooking__myBookings-text">
+                                    {`Desk : ${booking.deskName} on Floor : ${booking.floorName}`}
+                                </ListGroupItemText>
+                                <ListGroupItemText className="deskbooking__myBookings-text">
+                                    {`Building : ${booking.buildingName}, Campus : ${booking.campusName}`}
+                                </ListGroupItemText>
+                                <Row className="justify-content-between deskbooking__myBookings-footer">
+                                    <Col>
+                                        <small>
+                                            From : { moment( booking.fromTime ).format( "MMMM Do, h:mm a" ) }
+                                        </small>  
+                                    </Col>
+                                    <Col>
+                                        <small>
+                                            To : { moment( booking.toTime ).format( "MMMM Do, h:mm a" ) }
+                                        </small>
+                                    </Col>
+                                </Row>
+                                
+                                { this.state.activeBookingIndex === index &&
+                                    <Row className = "deskbooking__booknow-button">
+                                        <Col>
+                                            <Button 
+                                                color="danger"
+                                                size="sm"
+                                                onClick = {(e) => { 
+                                                    e.preventDefault();
+                                                    this.deleteModalToggle( booking.id ); 
+                                                }}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </Col>
+                                    </Row>
+                                }
+                                <Modal isOpen={ this.state.isDeleteModalOpen } toggle={ this.deleteModalToggle } className = "modal-dialog" size="sm">
+                                    <ModalBody className = "mx-auto deskbooking__modal-body" >
+                                        {`Are you sure you want to delete the booking with ID: ${this.state.itemIdToDelete}? `}
+                                    </ModalBody>
+                                    <ModalFooter>
+                                        <Button 
+                                            color="primary"
+                                            size="sm"
+                                            onClick = { this.deleteModalToggle }
+                                        >
+                                            No! Go back
+                                        </Button>
+                                        <Button 
+                                            color="danger"
+                                            size="sm"
+                                            onClick = { this.deleteBooking }
+                                        >
+                                            Yes! Go ahead
+                                        </Button>
+                                    </ModalFooter>
+                                </Modal> 
+                            </ListGroupItem>
+                        )
+
+                    })
+                }
+
+            </ListGroup>                
+        </Col>
+
+    )
+
+    renderAvailableDesks = () => (
+
+        <Col xs="12" md="6" className="deskbooking__user-bookings">
+            <ListGroup>
+                <ListGroupItem className="deskbooking__myBookings-title">
+                    <ListGroupItemText>
+                        <span className="deskbooking__myBookings-title-span">Available Desks</span>
+                        { 
+                            this.props.availableDesks && 
+                            <Badge color="secondary" pill>{this.props.availableDesks.length}</Badge> 
+                        }
+                    </ListGroupItemText>
+                </ListGroupItem>
+                {
+                    this.props.availableDesks.map( ( desk, index ) => {
+
+                        return( 
+                            <ListGroupItem 
+                                tag="button" 
+                                onClick = { () => { this.showDeskDetails( index ) } }
+                                className={ `text__align-left deskbooking__availableDesks-item ${ this.state.activeIndex === index && "active__desk" }` }
+                            >
+                                <ListGroupItemHeading className= {`deskbooking__availableDesks-heading ${ this.state.activeIndex === index && "active__desk" }`} >
+                                    {`Campus Name : ${desk.campusName}, Building : ${desk.buildingName}`}
+                                </ListGroupItemHeading>                           
+                                <ListGroupItemText className={`deskbooking__availableDesks-text ${ this.state.activeIndex === index && "active__desk" }`}>
+                                    {`Desk ID : ${desk.deskId}, Desk Name : ${desk.deskName} on Floor : ${desk.floorName}`}
+                                </ListGroupItemText>
+
+                                { desk.zonesId && desk.deskName &&
+                                <Row className="justify-content-between deskbooking__availableDesks-footer">
+                                    <Col>
+                                        <small className="deskbooking__availableDesks-footer-text">
+                                        Zone Id : {desk.zonesId}
+                                        </small>  
+                                    </Col>
+                                    <Col>
+                                        <small className="deskbooking__availableDesks-footer-text">
+                                            Zone name : {desk.zonesName}
+                                        </small>
+                                    </Col>
+                                </Row>
+                                } 
+
+                                { this.state.activeIndex === index &&
+                                    <Row className = "deskbooking__booknow-button">
+                                        <Col>
+                                            <Button 
+                                                color="danger"
+                                                size="sm"
+                                                onClick = {(e) => { 
+                                                    e.preventDefault();
+                                                    this.addDeskBooking( desk.deskId ); 
+                                                }}
+                                            >
+                                                Book Now
+                                            </Button>
+                                        </Col>
+                                    </Row>
+                                }
+
+                                <Modal isOpen={ this.state.isAddModalOpen } toggle={ this.toggleAddModal } className = "modal-dialog" size="sm">
+                                    <ModalBody className = "mx-auto deskbooking__modal-body" >
+                                        Congrats! Your booking has been completed. Please check 'My Bookings' section.
+                                    </ModalBody>
+                                    <ModalFooter>
+                                        <Button 
+                                            color="danger"
+                                            size="sm"
+                                            onClick = { this.toggleAddModal }
+                                        >
+                                            Close
+                                        </Button>
+                                    </ModalFooter>
+                                </Modal>
+
+                            </ListGroupItem>
+                        )
+
+                    })
+                }
+            </ListGroup>                
+        </Col> 
+
+    )
 
     renderMainContent = () => {
 
@@ -316,94 +526,9 @@ class DeskBooking extends React.Component {
             <Row className="justify-content-center deskbooking__userSession-row">
 
                 {/*Section to display active bookings*/}
-                <Col xs="12" md="6" className="deskbooking__user-bookings">
-                    <ListGroup>
-                        <ListGroupItem className="deskbooking__myBookings-title">
-                            <ListGroupItemText>
-                                <span className="deskbooking__myBookings-title-span">My Bookings</span>
-                                { 
-                                    this.props.myBookings && 
-                                    <Badge color="secondary" pill>{this.props.myBookings.length}</Badge> 
-                                }
-                            </ListGroupItemText>
-                        </ListGroupItem>
-
-                        {
-                            this.props.myBookings.map( ( booking, index ) => {
-                                
-                                return(
-                                    <ListGroupItem
-                                        tag="button"
-                                        className={ `text__align-left ${ this.state.activeBookingIndex === index && "deskbooking__myBookings-active" }`}
-                                        onClick = { () => { this.showBookingDetails( index ) } } 
-                                    >
-                                        <ListGroupItemHeading className="deskbooking__myBookings-heading">
-                                            Booking ID : {booking.id}
-                                        </ListGroupItemHeading>                           
-                                        <ListGroupItemText className="deskbooking__myBookings-text">
-                                            {`Desk : ${booking.deskName} on Floor : ${booking.floorName}`}
-                                        </ListGroupItemText>
-                                        <ListGroupItemText className="deskbooking__myBookings-text">
-                                            {`Building : ${booking.buildingName}, Campus : ${booking.campusName}`}
-                                        </ListGroupItemText>
-                                        <Row className="justify-content-between deskbooking__myBookings-footer">
-                                            <Col>
-                                                <small>
-                                                    From : { moment( booking.fromTime ).format( "MMMM Do, h:mm a" ) }
-                                                </small>  
-                                            </Col>
-                                            <Col>
-                                                <small>
-                                                    To : { moment( booking.toTime ).format( "MMMM Do, h:mm a" ) }
-                                                </small>
-                                            </Col>
-                                        </Row>
-                                        
-                                        { this.state.activeBookingIndex === index &&
-                                            <Row className = "deskbooking__booknow-button">
-                                                <Col>
-                                                    <Button 
-                                                        color="danger"
-                                                        size="sm"
-                                                        onClick = {(e) => { 
-                                                            e.preventDefault();
-                                                            this.deleteModalToggle( booking.id ); 
-                                                        }}
-                                                    >
-                                                        Delete
-                                                    </Button>
-                                                </Col>
-                                            </Row>
-                                        }
-                                        <Modal isOpen={ this.state.isDeleteModalOpen } toggle={ this.deleteModalToggle } className = "modal-dialog" size="sm">
-                                            <ModalBody className = "mx-auto deskbooking__modal-body" >
-                                                {`Are you sure you want to delete the booking with ID: ${this.state.itemIdToDelete}? `}
-                                            </ModalBody>
-                                            <ModalFooter>
-                                                <Button 
-                                                    color="primary"
-                                                    size="sm"
-                                                    onClick = { this.deleteModalToggle }
-                                                >
-                                                    No! Go back
-                                                </Button>
-                                                <Button 
-                                                    color="danger"
-                                                    size="sm"
-                                                    onClick = { this.deleteBooking }
-                                                >
-                                                    Yes! Go ahead
-                                                </Button>
-                                            </ModalFooter>
-                                        </Modal> 
-                                    </ListGroupItem>
-                                )
-
-                            })
-                        }
-
-                    </ListGroup>                
-                </Col>
+                {   
+                    this.renderActiveBookings()
+                }
                 
                 {/*Section to display 'addBooking' button*/}
                 { 
@@ -416,87 +541,7 @@ class DeskBooking extends React.Component {
                 {/*Section to display Available Desks*/}
                 {
                     this.props.availableDesks.length > 0 &&
-                        <Col xs="12" md="6" className="deskbooking__user-bookings">
-                            <ListGroup>
-                                <ListGroupItem className="deskbooking__myBookings-title">
-                                    <ListGroupItemText>
-                                        <span className="deskbooking__myBookings-title-span">Available Desks</span>
-                                        { 
-                                            this.props.availableDesks && 
-                                            <Badge color="secondary" pill>{this.props.availableDesks.length}</Badge> 
-                                        }
-                                    </ListGroupItemText>
-                                </ListGroupItem>
-                                {
-                                    this.props.availableDesks.map( ( desk, index ) => {
-
-                                        return( 
-                                            <ListGroupItem 
-                                                tag="button" 
-                                                onClick = { () => { this.showDeskDetails( index ) } }
-                                                className={ `text__align-left deskbooking__availableDesks-item ${ this.state.activeIndex === index && "active__desk" }` }
-                                            >
-                                                <ListGroupItemHeading className= {`deskbooking__availableDesks-heading ${ this.state.activeIndex === index && "active__desk" }`} >
-                                                    {`Campus Name : ${desk.campusName}, Building : ${desk.buildingName}`}
-                                                </ListGroupItemHeading>                           
-                                                <ListGroupItemText className={`deskbooking__availableDesks-text ${ this.state.activeIndex === index && "active__desk" }`}>
-                                                    {`Desk ID : ${desk.deskId}, Desk Name : ${desk.deskName} on Floor : '${desk.floorName}'`}
-                                                </ListGroupItemText>
-
-                                                { desk.zonesId && desk.deskName &&
-                                                <Row className="justify-content-between deskbooking__availableDesks-footer">
-                                                    <Col>
-                                                        <small className="deskbooking__availableDesks-footer-text">
-                                                        Zone Id : {desk.zonesId}
-                                                        </small>  
-                                                    </Col>
-                                                    <Col>
-                                                        <small className="deskbooking__availableDesks-footer-text">
-                                                            Zone name : {desk.zonesName}
-                                                        </small>
-                                                    </Col>
-                                                </Row>
-                                                } 
-
-                                                { this.state.activeIndex === index &&
-                                                    <Row className = "deskbooking__booknow-button">
-                                                        <Col>
-                                                            <Button 
-                                                                color="danger"
-                                                                size="sm"
-                                                                onClick = {(e) => { 
-                                                                    e.preventDefault();
-                                                                    this.addDeskBooking( desk.deskId ); 
-                                                                }}
-                                                            >
-                                                                Book Now
-                                                            </Button>
-                                                        </Col>
-                                                    </Row>
-                                                }
-
-                                                <Modal isOpen={ this.state.isAddModalOpen } toggle={ this.toggleAddModal } className = "modal-dialog" size="sm">
-                                                    <ModalBody className = "mx-auto deskbooking__modal-body" >
-                                                        Congrats! Your booking has been completed. Please check 'My Bookings' section.
-                                                    </ModalBody>
-                                                    <ModalFooter>
-                                                        <Button 
-                                                            color="danger"
-                                                            size="sm"
-                                                            onClick = { this.toggleAddModal }
-                                                        >
-                                                            Close
-                                                        </Button>
-                                                    </ModalFooter>
-                                                </Modal>
-
-                                            </ListGroupItem>
-                                        )
-
-                                    })
-                                }
-                            </ListGroup>                
-                        </Col> 
+                    this.renderAvailableDesks()
                 }
 
             </Row>

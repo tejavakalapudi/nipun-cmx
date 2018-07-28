@@ -11,6 +11,8 @@ const setDesks = ( desks = [] ) => ({
 
 export const getAvailableDesks = ({ token, campusId, buildingId, floorId, fromTime, toTime }) => {
 
+    let desksByBuildings = {};
+
     return( dispatch ) => {
 
         AxiosInstance.get( "ws/desk/checkAvailability",{
@@ -28,8 +30,12 @@ export const getAvailableDesks = ({ token, campusId, buildingId, floorId, fromTi
         .then( res => {
     
             console.log( "Response about available desks", res );
-            
-            dispatch( setDesks( res.data.msg.checkAvailability ) );
+
+            dispatch( setDesks(
+
+                res.data.msg.checkAvailability.filter( desk =>  desk.status === "Available" )
+
+            ) );
     
         })
         .catch( error => {
@@ -39,5 +45,15 @@ export const getAvailableDesks = ({ token, campusId, buildingId, floorId, fromTi
         });
         
     }
+
+}
+
+export const arrangeDesksByCriteria = ( arr, key ) => {
+
+    return [ ...arr.reduce( ( acc, o ) =>
+
+        acc.set( o[ key ], ( acc.get( o[ key ] ) || [] ).concat( o ) )
+
+    ,new Map ).values() ];
 
 }
