@@ -54,42 +54,38 @@ class DeskBooking extends React.Component {
         itemIdToDelete : "",
         desksByBuilding : "",
         desksByFloors : "",
-        activeBuildingName : "",
-        activeFloorName : "",
-        activeIndex : 0,
-        listOfFloors : [],
-        listOfBuildings : []
+        activeBuildingIndex : "",
+        activeIndex : 0 
     }
 
-    handleEmployeeLoginDetails = ( e, type ) => {
+    handleEmployeeLogin = ( e ) => {
 
         e.preventDefault();
         e.persist();
 
-        if( type === "employeeId" ){
+        this.setState({
+            employeeId : e.target.value
+        });
+    }
 
-            this.setState({
-                employeeId : e.target.value
-            });
+    handleEmployeeEmail = ( e ) => {
 
-        }
+        e.preventDefault();
+        e.persist();
 
-        if( type === "employeeEmail" ){
-            
-            this.setState({
-                employeeEmail : e.target.value
-            });
+        this.setState({
+            employeeEmail : e.target.value
+        });
+    }
 
-        }
+    handleEmployeePassword = ( e ) => {
 
-        if( type === "employeePassword" ){
-            
-            this.setState({
-                employeePassword : e.target.value
-            });
+        e.preventDefault();
+        e.persist();
 
-        }
-
+        this.setState({
+            employeePassword : e.target.value
+        });
     }
 
     showIdSection = () => {
@@ -147,6 +143,19 @@ class DeskBooking extends React.Component {
             });     
         }
         
+    }
+
+    componentDidUpdate( prevProps ) {
+
+        if ( this.props.availableDesks !== prevProps.availableDesks && this.props.availableDesks.length > 0 ) {
+
+            this.setState({
+                isFormOpen : false
+                //desksByBuilding :  arrangeDesksByCriteria( this.props.availableDesks, "buildingId" )
+            });
+
+        }
+
     }
 
     desksByFloors = ( buildingArray ) => {
@@ -235,20 +244,11 @@ class DeskBooking extends React.Component {
         });
     }
 
-    showFloorsByBuildings = ( name ) => {
+    showDesksByBuildings = ( id ) => {
 
         this.setState({
-            activeBuildingName : name
+            activeBuildingIndex : id
         })
-
-    }
-
-    showDesksByFloors = ( name ) => {
-
-        this.setState({
-            activeFloorName : name
-        })
-
 
     }
 
@@ -263,114 +263,10 @@ class DeskBooking extends React.Component {
         })
     }
 
-    componentDidUpdate( prevProps ) {
-
-        if ( this.props.availableDesks !== prevProps.availableDesks && this.props.availableDesks.length > 0 ) {
-
-            this.setState({
-                isFormOpen : false
-            });
-
-            let listOfBuildings = [], 
-            listOfFloors = [];
-        
-            this.props.availableDesks.forEach( ( desk ) => {
-
-                if( listOfBuildings.indexOf( desk.buildingName ) === -1 ){
-
-                    listOfBuildings.push( desk.buildingName );
-
-                } 
-
-                if( listOfFloors.indexOf( desk.floorName ) === -1 ){
-
-                    listOfFloors.push( desk.floorName );
-
-                } 
-
-            });
-
-            this.setState({
-                listOfBuildings,
-                listOfFloors
-            });
-
-        }
-
-    }
-
-    renderDeskList = ( desk, index ) => {
-        
-        return (
-            
-            <ListGroupItem 
-                tag="button" 
-                onClick = { () => { this.showDeskDetails( index ) } }
-                className={ `text__align-left deskbooking__availableDesks-item ${ this.state.activeIndex === index && "active__desk" }` }
-            >
-                <ListGroupItemHeading className= {`deskbooking__availableDesks-heading ${ this.state.activeIndex === index && "active__desk" }`} >
-                    {`Campus Name : ${desk.campusName}, Building : ${desk.buildingName}`}
-                </ListGroupItemHeading>                           
-                <ListGroupItemText className={`deskbooking__availableDesks-text ${ this.state.activeIndex === index && "active__desk" }`}>
-                    {`Desk ID : ${desk.deskId}, Desk Name : ${desk.deskName} on Floor : ${desk.floorName}`}
-                </ListGroupItemText>
-
-                { desk.zonesId && desk.deskName &&
-                    <Row className="justify-content-between deskbooking__availableDesks-footer">
-                        <Col>
-                            <small className="deskbooking__availableDesks-footer-text">
-                            Zone Id : {desk.zonesId}
-                            </small>  
-                        </Col>
-                        <Col>
-                            <small className="deskbooking__availableDesks-footer-text">
-                                Zone name : {desk.zonesName}
-                            </small>
-                        </Col>
-                    </Row>
-                } 
-
-                { this.state.activeIndex === index &&
-                    <Row className = "deskbooking__booknow-button">
-                        <Col>
-                            <Button 
-                                color="danger"
-                                size="sm"
-                                onClick = {(e) => { 
-                                    e.preventDefault();
-                                    this.addDeskBooking( desk.deskId ); 
-                                }}
-                            >
-                                Book Now
-                            </Button>
-                        </Col>
-                    </Row>
-                }
-
-                <Modal isOpen={ this.state.isAddModalOpen } toggle={ this.toggleAddModal } className = "modal-dialog" size="sm">
-                    <ModalBody className = "mx-auto deskbooking__modal-body" >
-                        Congrats! Your booking has been completed. Please check 'My Bookings' section.
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button 
-                            color="danger"
-                            size="sm"
-                            onClick = { this.toggleAddModal }
-                        >
-                            Close
-                        </Button>
-                    </ModalFooter>
-                </Modal>
-
-            </ListGroupItem>
-
-        )
-    }
-
     renderActiveBookings = () => (
 
         <Col xs="12" md="6" className="deskbooking__user-bookings">
-            <ListGroup className="deskbooking__list-group">
+            <ListGroup>
                 <ListGroupItem className="deskbooking__myBookings-title">
                     <ListGroupItemText>
                         <span className="deskbooking__myBookings-title-span">My Bookings</span>
@@ -463,7 +359,7 @@ class DeskBooking extends React.Component {
     renderAvailableDesks = () => (
 
         <Col xs="12" md="6" className="deskbooking__user-bookings">
-            <ListGroup className="deskbooking__list-group">
+            <ListGroup>
                 <ListGroupItem className="deskbooking__myBookings-title">
                     <ListGroupItemText>
                         <span className="deskbooking__myBookings-title-span">Available Desks</span>
@@ -473,7 +369,7 @@ class DeskBooking extends React.Component {
                         }
                     </ListGroupItemText>
                 </ListGroupItem>
-                {/*
+                {
                     this.props.availableDesks.map( ( desk, index ) => {
 
                         return( 
@@ -490,18 +386,18 @@ class DeskBooking extends React.Component {
                                 </ListGroupItemText>
 
                                 { desk.zonesId && desk.deskName &&
-                                    <Row className="justify-content-between deskbooking__availableDesks-footer">
-                                        <Col>
-                                            <small className="deskbooking__availableDesks-footer-text">
-                                            Zone Id : {desk.zonesId}
-                                            </small>  
-                                        </Col>
-                                        <Col>
-                                            <small className="deskbooking__availableDesks-footer-text">
-                                                Zone name : {desk.zonesName}
-                                            </small>
-                                        </Col>
-                                    </Row>
+                                <Row className="justify-content-between deskbooking__availableDesks-footer">
+                                    <Col>
+                                        <small className="deskbooking__availableDesks-footer-text">
+                                        Zone Id : {desk.zonesId}
+                                        </small>  
+                                    </Col>
+                                    <Col>
+                                        <small className="deskbooking__availableDesks-footer-text">
+                                            Zone name : {desk.zonesName}
+                                        </small>
+                                    </Col>
+                                </Row>
                                 } 
 
                                 { this.state.activeIndex === index &&
@@ -540,70 +436,6 @@ class DeskBooking extends React.Component {
                         )
 
                     })
-                */}
-
-                {
-                    this.state.selectedBuildingId === "" && this.state.listOfBuildings.length > 0 && 
-                    this.state.listOfBuildings.map( ( buildingName ) => (
-                        <ListGroup>
-                            <ListGroupItem 
-                                className="text__align-left deskbooking__myBookings-title" 
-                                tag="button" 
-                                onClick = { () => { this.showFloorsByBuildings( buildingName ) } }
-                            >
-                                <ListGroupItemText>
-                                    <span className="deskbooking__myBookings-title-span"> { `Building : ${buildingName}` } </span>
-                                    { 
-                                        <Badge color="secondary" pill>
-                                        { 
-                                            this.props.availableDesks.filter( ( desk ) => 
-                                                desk.buildingName === buildingName
-                                            ).length 
-                                        }
-                                        </Badge> 
-                                    }
-                                </ListGroupItemText>
-                            </ListGroupItem>
-                            
-                            { this.state.activeBuildingName === buildingName && 
-                                this.state.listOfFloors.map( ( floorName ) => (
-                                    <ListGroup>
-                                        <ListGroupItem 
-                                            className="text__align-left deskbooking__myBookings-title" 
-                                            tag="button"
-                                            onClick = { () => { this.showDesksByFloors( floorName ) } }
-                                        >
-                                            <ListGroupItemText>
-                                                <span className="deskbooking__myBookings-title-span"> { `Floor : ${floorName}` } </span>
-                                                { 
-                                                    <Badge color="secondary" pill>
-                                                    {   
-                                                        this.props.availableDesks.filter( ( desk ) => 
-                                                            desk.buildingName === this.state.activeBuildingName && desk.floorName === floorName
-                                                        ).length 
-                                                    }
-                                                    </Badge> 
-                                                }
-                                            </ListGroupItemText>
-                                        </ListGroupItem>
-
-                                        { this.state.activeFloorName === floorName &&
-                                            this.props.availableDesks.filter( ( desk ) => 
-                                                
-                                                desk.buildingName === this.state.activeBuildingName && desk.floorName === floorName
-
-                                            ).map( ( desk, index ) => {
-
-                                                return this.renderDeskList( desk, index )
-
-                                            })
-                                        }
-
-                                    </ListGroup>
-                                ))
-                            }
-                        </ListGroup>
-                    ))
                 }
             </ListGroup>                
         </Col> 
@@ -634,7 +466,7 @@ class DeskBooking extends React.Component {
                                     <FormText className="text__align-center deskbooking__login-text" color="#FBB429">
                                         Employee ID
                                     </FormText>
-                                    <Input className="deskbooking__login-input-box text__align-center" type="text" name="employeeId" value = { this.state.employeeId } onChange={ ( e ) => { this.handleEmployeeLoginDetails( e, "employeeId" ) } } />
+                                    <Input className="deskbooking__login-input-box text__align-center" type="text" name="employeeId" value = { this.state.employeeId } onChange={ this.handleEmployeeLogin } />
                                 </FormGroup>
                                 <div className = "justify-content-center">
                                     <FormGroup>
@@ -656,13 +488,13 @@ class DeskBooking extends React.Component {
                                     <FormText className="text__align-center deskbooking__login-text" color="#FBB429">
                                         User
                                     </FormText>
-                                    <Input className="deskbooking__login-input-box text__align-center" type="text" name="employeeId" value = { this.state.employeeEmail } onChange={ ( e ) => { this.handleEmployeeLoginDetails( e, "employeeEmail" ) } } />
+                                    <Input className="deskbooking__login-input-box text__align-center" type="text" name="employeeId" value = { this.state.employeeEmail } onChange={ this.handleEmployeeEmail } />
                                 </FormGroup>
                                 <FormGroup>
                                     <FormText className="text__align-center deskbooking__login-text" color="#FBB429">
                                         Password
                                     </FormText>
-                                    <Input className="deskbooking__login-input-box text__align-center" type="password" name="employeeId" value = { this.state.employeePassword } onChange={ ( e ) => { this.handleEmployeeLoginDetails( e, "employeePassword" ) } } />
+                                    <Input className="deskbooking__login-input-box text__align-center" type="password" name="employeeId" value = { this.state.employeePassword } onChange={ this.handleEmployeePassword } />
                                 </FormGroup>
                                 <Container>
                                     <Row className = "justify-content-center">
