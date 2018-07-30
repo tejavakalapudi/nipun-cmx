@@ -6,6 +6,7 @@ import campusesReducer from "../reducers/campuses";
 import buildingsReducer from "../reducers/buildings";
 import floorsReducer from "../reducers/floors";
 import desksReducer from "../reducers/desks";
+import filtersReducer from "../reducers/filters";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -18,7 +19,8 @@ export default() => {
             campuses : campusesReducer,
             buildings : buildingsReducer,
             floors : floorsReducer,
-            availableDesks : desksReducer
+            desksInfo : desksReducer,
+            filters : filtersReducer
         }),
         composeEnhancers( applyMiddleware( thunk ))
     );

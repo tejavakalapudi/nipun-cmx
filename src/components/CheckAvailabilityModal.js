@@ -17,7 +17,8 @@ import {
     ModalFooter,
     ModalHeader
 } from "reactstrap";
-import { getAvailableDesks } from "../actions/desks";
+import { getAvailableDesks, setReqStatus } from "../actions/desks";
+import selectedDesks from  "../selectors/availableDesks";
 
 class CheckModalAvailability extends React.Component {
 
@@ -32,8 +33,7 @@ class CheckModalAvailability extends React.Component {
         currentFloorId : "",
         fromTime : "",
         toTime : "",
-        requestSent : false,
-        problemInFetchingInfo : false
+        requestSent : false
     }
 
     checkAvailability = ( e ) => {
@@ -66,33 +66,17 @@ class CheckModalAvailability extends React.Component {
 
         //reseting all the form values for next query
         this.setState({
-            currentCampus : "Select a campus",
-            currentCampusId : "",
-            currentBuilding : "Select a floor",
-            currentBuildingId : "",
-            currentFloor : "Select a floor",
-            currentFloorId : "",
-            fromTime : "",
-            toTime : "",
             requestSent : true
         });
-
-        setTimeout( () => {
-
-            if( !this.state.problemInFetchingInfo && this.props.isOpen === true ){
-
-                this.setState({ 
-                    problemInFetchingInfo: true
-                });
-
-            }
-
-        }, 5000);
 
     }
 
     reset = () => {
+
         //reseting all the form values for next query
+
+        this.props.dispatch( setReqStatus( "" ) );
+
         this.setState({
             currentCampus : "Select a campus",
             currentCampusId : "",
@@ -102,9 +86,18 @@ class CheckModalAvailability extends React.Component {
             currentFloorId : "",
             fromTime : "",
             toTime : "",
-            requestSent : false,
-            problemInFetchingInfo: false
+            requestSent : false
         });
+
+    }
+
+    componentDidUpdate( prevProps ) {
+
+        if ( this.props.availableDesks.length !== prevProps.availableDesks.length && this.props.availableDesks.length > 0 ) {
+
+            this.reset();
+
+        }
 
     }
 
@@ -185,6 +178,7 @@ class CheckModalAvailability extends React.Component {
         return(
             <Modal isOpen={ this.props.isOpen } toggle={ this.props.toggle } className = "modal-dialog" size={this.state.requestSent ? "sm" : "lg"}>
                 <ModalBody className = "mx-auto deskbooking__modal-body" >
+
                     { !this.state.requestSent && 
                         <Form onSubmit = { this.checkAvailability } className = "mx-auto deskbooking__form text__align-center">
                             {/*Campus Select*/}
@@ -321,18 +315,30 @@ class CheckModalAvailability extends React.Component {
                         </Form> 
                     }
 
-                    { this.state.requestSent && !this.state.problemInFetchingInfo &&
-                        <div> Please wait while we gather your information </div>
+                    {/* Section to display message between Request time and response time */}
+                    { this.state.requestSent && this.props.availabilityReqStatus === "" &&
+                        <div> 
+                            Please wait while we gather your information! 
+                        </div>
+                    }
+                    
+                    {/* Section to display message if request has been timedout */}
+                    { this.state.requestSent && this.props.availabilityReqStatus === false &&
+                        <div>
+                            There is some issue fetching information for the requested criteria. 
+                            Please try again after some time. Thanks. 
+                        </div>
                     }
 
-                    { this.state.requestSent && this.state.problemInFetchingInfo &&
+                    {/* Section to display message if there are no available desks*/}
+                    { this.state.requestSent && this.props.availabilityReqStatus === true && this.props.availableDesks.length === 0 &&
                         <Container>
                             <Row className="justify-content-center">
-                                There is some issue fetching information for the requested criteria.
+                                There are no available desks for the requested criteria.
                                 Please check again with a different criteria.
                             </Row>
                             <Row className="justify-content-center">
-                                <Button color="danger" size="md" onClick={this.reset}>New Request</Button>
+                                <Button color="danger" size="md" onClick={ this.reset }>New Request</Button>
                             </Row>
                         </Container>
                     }
@@ -356,7 +362,9 @@ const mapStateToProps = ( store ) => {
     return {
         campuses : store.campuses,
         buildings : store.buildings,
-        floors : store.floors
+        floors : store.floors,
+        availableDesks : selectedDesks( store.desksInfo.availableDesks, store.filters ),
+        availabilityReqStatus : store.desksInfo.requestSuccess
     }
 
 }

@@ -22,21 +22,15 @@ import {
     UncontrolledCollapse, CardBody, Card
 } from "reactstrap";
 import { connect } from "react-redux";
-import moment from 'moment';
-
 import LoadingComponent from "./LoadingPage";
 import LoginScreen from "./LoginScreen";
 import MyBookings from "./MyBookings";
 import AvailableDeskItem from "./AvailableDeskItem";
+
 import CheckAvailabilityModal from "./CheckAvailabilityModal";
-
 import { addDeskBooking, removeDeskBooking } from "../actions/bookings";
-import { setZoneFilter, setBuildingFilter, setFloorFilter } from "../actions/filters";
 import { getAvailableDesks } from "../actions/desks";
-import selectedDesks from  "../selectors/availableDesks";
-
-import { IoAndroidRefresh } from "react-icons/lib/io";
-
+import moment from 'moment';
 
 class DeskBooking extends React.Component {
 
@@ -56,10 +50,7 @@ class DeskBooking extends React.Component {
         activeIndex : 0,
         listOfFloors : [],
         listOfBuildings : [],
-        listOfZones : [],
-        filteredBuilding : "",
-        filteredFloor : "",
-        filteredZone : ""
+        listOfZones : []
     }
 
     toggleFormModal = () => {
@@ -102,7 +93,17 @@ class DeskBooking extends React.Component {
         this.props.dispatch( addDeskBooking( this.props.auth.sessionToken, deskId, this.state.fromTime, this.state.toTime ) );
 
         this.toggleAddModal();
-        this.checkAvailableDesks();
+
+        this.props.dispatch( getAvailableDesks(
+            {
+                token : this.props.auth.sessionToken,
+                campusId : this.state.selectedCampusId,
+                buildingId : this.state.selectedBuildingId,
+                floorId : this.state.selectedFloorId,
+                fromTime : this.state.fromTime,
+                toTime : this.state.toTime
+            }
+        ));
 
     }
 
@@ -175,9 +176,9 @@ class DeskBooking extends React.Component {
 
                 } 
 
-                if( listOfZones.indexOf( desk.zonesName ) === -1 ){
+                if( listOfZones.indexOf( desk.zoneName ) === -1 ){
 
-                    listOfZones.push( desk.zonesName );
+                    listOfZones.push( desk.zoneName );
 
                 } 
 
@@ -193,80 +194,24 @@ class DeskBooking extends React.Component {
 
     }
 
-    filterByBuilding = ( e ) => {
-
-        e.preventDefault();
-
-        this.props.dispatch(
-            setBuildingFilter( e.target.value )
-        );
-
-        this.setState({
-            filteredBuilding : e.target.value
-        });
-
-    }
-
-    filterByFloor = ( e ) => {
-
-        e.preventDefault();
-
-        this.props.dispatch(
-            setFloorFilter( e.target.value )
-        );
-
-        this.setState({
-            filteredFloor : e.target.value
-        });
-        
-    }
-
-    filterByZone = ( e ) => {
-
-        e.preventDefault();
-
-        this.props.dispatch(
-            setZoneFilter( e.target.value )
-        );
-
-        this.setState({
-            filteredZone : e.target.value
-        });
-        
-    }
-
     renderAvailableDesks = () => (
 
         <Col xs="12" md="6" className="deskbooking__user-bookings">
             <ListGroup className="deskbooking__list-group">
-
                 <ListGroupItem className="deskbooking__myBookings-title">
-
                     <ListGroupItemText>
                         <span className="deskbooking__myBookings-title-span">Available Desks</span>
                         { 
                             this.props.availableDesks && 
                             <Badge color="secondary" pill>{ this.props.availableDesks.length }</Badge> 
                         }
-
-                        <Button 
-                            color = "primary"
-                            className = "float__right"
-                            onClick={ this.toggleFormModal }
-                        >
-                            New Query
-                        </Button>
-                        
                     </ListGroupItemText>
                     
-                    <Row className="justify-content-between" >
-
+                    <Row className="justify-content-between">
                         <Col xs="4">
                             <Input 
                                 type="select" 
                                 name="building"
-                                value = { this.state.filteredBuilding }  
-                                onChange = { this.filterByBuilding }
                             >
                             <option value = "">Building</option>
                             {
@@ -279,13 +224,10 @@ class DeskBooking extends React.Component {
                             }
                             </Input>                        
                         </Col>
-
                         <Col xs="4">
                             <Input 
                                 type="select" 
                                 name="floor"
-                                value = { this.state.filteredFloor }  
-                                onChange = { this.filterByFloor }
                             >
                             <option value = "">Floor</option>
                             {
@@ -298,13 +240,10 @@ class DeskBooking extends React.Component {
                             }
                             </Input>                      
                         </Col>
-
                         <Col xs="4">
                             <Input 
                                 type="select" 
                                 name="zone"
-                                value = { this.state.filterByZone }  
-                                onChange = { this.filterByZone }
                             >
                             <option value = "">Zone</option>
                             {
@@ -317,25 +256,79 @@ class DeskBooking extends React.Component {
                             }
                             </Input>                    
                         </Col>
-
                     </Row>
-
                 </ListGroupItem>
 
                 {
-                    this.props.availableDesks.map( ( desk, index ) => {
+                    this.state.selectedBuildingId === "" && this.state.listOfBuildings.length > 0 && 
+                    this.state.listOfBuildings.map( ( buildingName ) => (
+                        <ListGroup>
+                            <ListGroupItem 
+                                className="text__align-left deskbooking__myBookings-title" 
+                                tag="button" 
+                                onClick = { () => { this.showFloorsByBuildings( buildingName ) } }
+                            >
+                                <ListGroupItemText>
+                                    <span className="deskbooking__myBookings-title-span"> { `Building : ${buildingName}` } </span>
+                                    { 
+                                        <Badge color="secondary" pill>
+                                        { 
+                                            this.props.availableDesks.filter( ( desk ) => 
+                                                desk.buildingName === buildingName
+                                            ).length 
+                                        }
+                                        </Badge> 
+                                    }
+                                </ListGroupItemText>
+                            </ListGroupItem>
+                            
+                            { this.state.activeBuildingName === buildingName && 
+                                this.state.listOfFloors.map( ( floorName ) => (
+                                    <ListGroup>
+                                        <ListGroupItem 
+                                            className="text__align-left deskbooking__myBookings-title" 
+                                            tag="button"
+                                            onClick = { () => { this.showDesksByFloors( floorName ) } }
+                                        >
+                                            <ListGroupItemText>
+                                                <span className="deskbooking__myBookings-title-span"> { `Floor : ${floorName}` } </span>
+                                                { 
+                                                    <Badge color="secondary" pill>
+                                                    {   
+                                                        this.props.availableDesks.filter( ( desk ) => 
+                                                            desk.buildingName === this.state.activeBuildingName && desk.floorName === floorName
+                                                        ).length 
+                                                    }
+                                                    </Badge> 
+                                                }
+                                            </ListGroupItemText>
+                                        </ListGroupItem>
 
-                        return (
-                            <AvailableDeskItem 
-                                desk = { desk }
-                                index = { index }
-                                activeIndex = { this.state.activeIndex }
-                                addDeskBooking = { this.addDeskBooking }
-                                showDeskDetails = { this.showDeskDetails }
-                            />
-                        )
+                                        { this.state.activeFloorName === floorName &&
+                                            this.props.availableDesks.filter( ( desk ) => 
+                                                
+                                                desk.buildingName === this.state.activeBuildingName && desk.floorName === floorName
 
-                    })
+                                            ).map( ( desk, index ) => {
+
+                                                return (
+                                                    <AvailableDeskItem 
+                                                        desk = { desk }
+                                                        index = { index }
+                                                        activeIndex = { this.state.activeIndex }
+                                                        addDeskBooking = { this.addDeskBooking }
+                                                        showDeskDetails = { this.showDeskDetails }
+                                                    />
+                                                )
+
+                                            })
+                                        }
+
+                                    </ListGroup>
+                                ))
+                            }
+                        </ListGroup>
+                    ))
                 }
 
                 <Modal isOpen={ this.state.isAddModalOpen } toggle={ this.toggleAddModal } className = "modal-dialog" size="sm">
@@ -420,7 +413,7 @@ class DeskBooking extends React.Component {
 
     render(){
 
-        window.addEventListener( "resize", this.resizeDeskBookingPage );
+        window.addEventListener( 'resize', this.resizeDeskBookingPage );
 
         return( 
             <div id="deskBookingDiv" className = "deskbooking__container" style={{ minHeight: this.state.minHeight, maxHeight: this.state.minHeight }}> 
@@ -467,11 +460,29 @@ class DeskBooking extends React.Component {
 const mapStateToProps = ( store ) => {
 
     return {
+        services : store.services,
         auth : store.auth,
+        campuses : store.campuses,
+        buildings : store.buildings,
+        floors : store.floors,
         myBookings : store.myBookings,
-        availableDesks : selectedDesks( store.desksInfo.availableDesks, store.filters )
+        availableDesks : store.availableDesks
     }
 
 }
 
 export default connect( mapStateToProps )( DeskBooking );
+
+/*
+bookedBy:null
+buildingName:"Level5"
+campusName:"Ayyappa-Central"
+deskId:56
+deskName:"Desk-A1"
+floorId:"78"
+floorMap:"resources/img/Ayyappa_Central/Level5/Nipun-IT/NipunFloorIT.jpg"
+floorName:"Nipun-IT"
+fromTime:null
+toTime:null
+zonesId:"121"
+zonesName:"ConferenceRoom1"*/

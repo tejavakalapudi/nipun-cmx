@@ -28,7 +28,7 @@ import { connect } from "react-redux";
 import LoadingComponent from "./LoadingPage";
 import CheckAvailabilityModal from "./CheckAvailabilityModal";
 import { addDeskBooking, removeDeskBooking } from "../actions/bookings";
-import { getAvailableDesks, arrangeDesksByCriteria } from "../actions/desks";
+import { getAvailableDesks } from "../actions/desks";
 import moment from 'moment';
 
 class DeskBooking extends React.Component {
@@ -53,7 +53,6 @@ class DeskBooking extends React.Component {
         selectedFloorId : "",
         itemIdToDelete : "",
         desksByBuilding : "",
-        desksByFloors : "",
         activeBuildingIndex : "",
         activeIndex : 0 
     }
@@ -151,18 +150,9 @@ class DeskBooking extends React.Component {
 
             this.setState({
                 isFormOpen : false
-                //desksByBuilding :  arrangeDesksByCriteria( this.props.availableDesks, "buildingId" )
             });
 
         }
-
-    }
-
-    desksByFloors = ( buildingArray ) => {
-
-        this.setState({
-            desksByFloors :  arrangeDesksByCriteria( buildingArray, "floorId" )
-        });
 
     }
 
