@@ -1,6 +1,7 @@
 .deskbooking__container{
     padding: 3rem 0;
-    background-color: #0788BB;
+    //background-color: #0788BB;
+    background-color:  #f0f0f0
 }
 
 .deskbooking__action-icon{
@@ -29,8 +30,13 @@
 
 .deskbooking__login-text{
     margin: 1rem 0;
-    color: #FBB429;
+    color: $deskbooking-logo-pink;
     font-size: 2rem;
+    font-weight: bold;
+}
+
+.deskbooking__login-section{
+    margin-top : 3rem;
 }
 
 .deskbooking__login-input{
@@ -41,8 +47,9 @@
     height: 4rem;
     padding: 0 3rem;
     font-size: 2rem;
+    font-weight: bold;
     letter-spacing: 3px;
-    box-shadow: 6px 6px 6px 2px #0a0a0a80;
+    box-shadow: 2px 8px 20px 3px #2525257a;
 }
 
 .deskbooking__login-credentials{
@@ -50,7 +57,8 @@
 }
 
 .deskbooking__login-enter{
-    margin: 3rem 0;
+    margin: 4rem 0;
+    font-weight: bold;
 }
 
 .deskbooking__user-addbooking{
@@ -59,10 +67,12 @@
 }
 
 .deskbooking__button{
-    font-size: 3rem;
+    font-size: 2rem;
     padding: 3rem;
     font-weight: bold;
     color: $deskbooking-logo-pink;
+    box-shadow: 2px 8px 20px 2px #6c757d;
+    border-radius: 1rem;
 }
 
 .deskbooking__myBookings-title{
@@ -134,7 +144,7 @@
 
 .deskbooking__form-input{
     height: 5rem !important;
-    font-size: 2rem !important;
+    font-size: 1.5rem !important;
     border: 1px solid $deskbooking-logo-teal;
     border-radius: .25rem;
     padding-left: 1rem;
@@ -159,12 +169,17 @@
     background-color: white;
 }
 
+.loader__png {
+    height: 5rem;
+    width: 5rem;
+}
+
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 768px) {
 
     .deskbooking__login-text{
-        margin: 2rem 0;
-        font-size: 4rem;
+        margin: 1.5rem 0;
+        font-size: 3rem;
     }
 
     .deskbooking__login-input{
@@ -175,11 +190,16 @@
         height: 6rem;
         font-size: 3rem;
     }
+
+    .deskbooking__login-section{
+        margin-top : 4rem;
+    }
+
 }
 /* Large devices and tabs (laptops/desktops, 992px and up) */
 @media only screen and (min-width: 992px) {
     .deskbooking__button{
-        font-size: 3.5rem;
+        font-size: 2.5rem;
         padding: 3rem;
     }
 } 

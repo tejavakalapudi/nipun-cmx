@@ -257,16 +257,17 @@ class CheckModalAvailability extends React.Component {
                                 </FormText>
                                 <DatePicker
                                     utcOffset=""
-                                    selected={this.state.fromTime}
-                                    onChange={this.onSelectFromTime}
+                                    selected={ this.state.fromTime }
+                                    onChange={ this.onSelectFromTime }
                                     showTimeSelect
                                     timeFormat="HH:mm"
-                                    timeIntervals={15}
-                                    todayButton={"Today"}
+                                    timeIntervals={ 15 }
+                                    todayButton={ "Today" }
                                     locale="en-in"
                                     placeholderText="Click to enter"
                                     dateFormat="LLL"
                                     className = "deskbooking__form-input"
+                                    minDate={ moment() }
                                 />
                             </FormGroup>
     
@@ -276,16 +277,16 @@ class CheckModalAvailability extends React.Component {
                                     To:
                                 </FormText>
                                 <DatePicker
-                                    selected={this.state.toTime}
-                                    onChange={this.onSelectToTime}
+                                    selected={ this.state.toTime === "" ? this.state.fromTime : this.state.toTime }
+                                    onChange={ this.onSelectToTime }
                                     showTimeSelect
                                     timeFormat="HH:mm"
-                                    timeIntervals={15}
-                                    todayButton={"Today"}
+                                    timeIntervals={ 15 }
                                     locale="en-in"
                                     placeholderText="Click to enter"
                                     dateFormat="LLL"
                                     className = "deskbooking__form-input"
+                                    minDate={ this.state.fromTime }
                                 />
                             </FormGroup>
     

@@ -8,7 +8,11 @@ const serviceLogin = ( response ) => ({
     response 
 });
 
-const startServiceLogin = ( employeeInfo = {} ) => {
+export const resetAuth = () => ({
+    type : "RESET_AUTH"
+});
+
+export const startServiceLogin = ( employeeInfo = {} ) => {
 
     return( dispatch ) => {
 
@@ -22,28 +26,35 @@ const startServiceLogin = ( employeeInfo = {} ) => {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'userName' : employeeInfo.userName,
-                'password' : sha256( `SMART${employeeInfo.password}GAADI` )
+                'password' : sha256( `SMART${ employeeInfo.password }GAADI` )
             },
             json: true
         }
 
         AxiosInstance.get( "ws/login", authOptions )
         .then( response => {
-            
-            console.log( "Logged in successfully", response );
     
             dispatch( serviceLogin({
                 loginStatus : response.data && response.data.status,
                 sessionToken : ( response.data && response.data.msg && response.data.msg.token ) || ""
             }));
-            
-            dispatch( getMyBookings( response.data.msg.token ) );
-            dispatch( getCampuses( response.data.msg.token ) );
+
+            if( response.data.status === "1" ){
+
+                dispatch( getMyBookings( response.data.msg.token ) );
+                dispatch( getCampuses( response.data.msg.token ) );
+
+            }
 
         })
         .catch( error => {
     
-            console.log( "Something went wrong while logging in", error );
+            console.error( "Something went wrong while logging in", error );
+
+            dispatch( serviceLogin({
+                loginStatus : "5",
+                sessionToken : ""
+            }));
     
         });
 
@@ -51,4 +62,3 @@ const startServiceLogin = ( employeeInfo = {} ) => {
 
 }
 
-export default startServiceLogin;

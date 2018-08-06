@@ -10,11 +10,8 @@ import "normalize.css/normalize.css";
 import "./styles/styles.scss";
 
 const store = configureStore();
-//const state = store.getState();
 
 ReactDOM.render( <MySite store = { store } />, document.getElementById( "app" ) );
-
-//ReactDOM.render( <LoadingScreen /> , document.getElementById("app") );
 
 
 

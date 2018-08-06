@@ -8,7 +8,11 @@ export default ( state = authDefault, action ) => {
     switch( action.type ){
 
         case "LOGIN_RESPONSE" : {
-            return { ...state, loginStatus : action.response.loginStatus, sessionToken : action.response.sessionToken } 
+            return { ...state, loginStatus : action.response.loginStatus, sessionToken : action.response.sessionToken }; 
+        }
+
+        case "RESET_AUTH" : {
+            return authDefault;
         }
         
         default:

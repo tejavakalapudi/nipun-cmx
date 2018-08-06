@@ -89,13 +89,13 @@ class MyBookings extends React.Component {
                                     onClick = { () => { this.showBookingDetails( index ) } } 
                                 >
                                     <ListGroupItemHeading className="deskbooking__myBookings-heading">
-                                        Booking ID : {booking.id}
+                                        Booking ID : { booking.id }
                                     </ListGroupItemHeading>                           
                                     <ListGroupItemText className="deskbooking__myBookings-text">
-                                        {`Desk : ${booking.deskName} on Floor : ${booking.floorName}`}
+                                        {`Desk : ${ booking.deskName } on Floor : ${ booking.floorName }`}
                                     </ListGroupItemText>
                                     <ListGroupItemText className="deskbooking__myBookings-text">
-                                        {`Building : ${booking.buildingName}, Campus : ${booking.campusName}`}
+                                        {`Building : ${ booking.buildingName }, Campus : ${ booking.campusName }`}
                                     </ListGroupItemText>
                                     <Row className="justify-content-between deskbooking__myBookings-footer">
                                         <Col>

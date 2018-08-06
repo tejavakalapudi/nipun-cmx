@@ -19,8 +19,6 @@ export const getCampuses = ( token ) => {
         })
         .then( res => {
     
-            console.log( "Response about campuses", res );
-    
             dispatch( setCampuses(
     
                 res.data.map( ( campus ) => {
@@ -40,7 +38,7 @@ export const getCampuses = ( token ) => {
         })
         .catch( error => {
     
-            console.log( "Something went wrong while getting information about conferences", error );
+            console.error( "Something went wrong while getting information about conferences", error );
     
         });
         

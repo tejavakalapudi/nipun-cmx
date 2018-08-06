@@ -35,8 +35,6 @@ export const getAvailableDesks = ({ token, campusId, buildingId, floorId, fromTi
             }
         })
         .then( res => {
-    
-            console.log( "Response about available desks", res );
 
             //send status to store and check for that value in check availability modal
 
@@ -51,7 +49,7 @@ export const getAvailableDesks = ({ token, campusId, buildingId, floorId, fromTi
         })
         .catch( error => {
     
-            console.log( "Something went wrong while getting information about available desks", error );
+            console.error( "Something went wrong while getting information about available desks", error );
 
             dispatch( setReqStatus( false ) );
     

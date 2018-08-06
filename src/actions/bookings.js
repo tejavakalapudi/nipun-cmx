@@ -7,6 +7,13 @@ const setMyBookings = ( bookings = [] ) => ({
 
 });
 
+const removeBooking = ( bookingId ) => ({
+
+    type : "REMOVE_BOOKING",
+    bookingId
+
+});
+
 export const getMyBookings = ( token ) => {
     
     return( dispatch ) => {
@@ -18,13 +25,12 @@ export const getMyBookings = ( token ) => {
         })
         .then( res => {
     
-            console.log( "Response about active bookings", res.data.msg );
             dispatch( setMyBookings( res.data.msg ) );
     
         })
         .catch( error => {
     
-            console.log( "Something went wrong while getting an information about active bookings - ", error );
+            console.error( "Something went wrong while getting an information about active bookings - ", error );
     
         });
         
@@ -45,8 +51,6 @@ export const addDeskBooking = ( token, deskId, fromTime, toTime ) => {
             }
         })
         .then( res => {
-    
-            console.log( "Response after making desk booking", res );
 
             if( res.data.msg == "success" ){
 
@@ -57,7 +61,7 @@ export const addDeskBooking = ( token, deskId, fromTime, toTime ) => {
         })
         .catch( error => {
     
-            console.log( "Something went wrong while making desk booking - ", error );
+            console.error( "Something went wrong while making desk booking - ", error );
     
         });
         
@@ -76,19 +80,13 @@ export const removeDeskBooking = ( token, bookingId ) => {
             }
         })
         .then( res => {
-    
-            console.log( "Response after deleting desk booking", res );
 
-            //if( res.data.msg == "success" ){
-
-                dispatch( getMyBookings( token ) );
-
-            //}
+            dispatch( removeBooking( bookingId ) );
     
         })
         .catch( error => {
     
-            console.log( "Something went wrong while deleting desk booking - ", error );
+            console.error( "Something went wrong while deleting desk booking - ", error );
     
         });
         

@@ -11,7 +11,9 @@ import {
     FormGroup, 
     FormText
 } from "reactstrap";
-import startServiceLogin from "../actions/auth";
+import { startServiceLogin, resetAuth } from "../actions/auth";
+import LoaderIcon from "../../public/images/loader.svg";
+import { connect } from "react-redux";
 
 class LoginScreen extends React.Component {
 
@@ -21,7 +23,8 @@ class LoginScreen extends React.Component {
         employeePassword : "",
         showIdSection : false,
         showEmailSection : false,
-        makingServiceLogin : false
+        makingServiceLogin : false,
+        loginSubmitted : false
     }
 
     handleEmployeeLoginDetails = ( e, type ) => {
@@ -78,32 +81,34 @@ class LoginScreen extends React.Component {
         e.preventDefault();
         e.persist();
 
+        this.props.dispatch( resetAuth() );
+
         this.props.dispatch( startServiceLogin({
             id : this.state.employeeId,
             userName : this.state.employeeEmail,
             password : this.state.employeePassword
         }));
 
-        this.props.onSubmit();
-
         this.setState({
             employeeId : "",
             employeeEmail : "",
-            employeePassword : ""
+            employeePassword : "",
+            loginSubmitted : true
         });
 
     }
 
     render(){
         return(
+
             <Row className="justify-content-center deskbooking__login-row">
 
                 {/*Login Icons*/}
                 <Col xs="3" onClick={this.showEmailSection} className="text__align-center" >
-                    <FaAt size={40} color = {this.state.showEmailSection ? "white" : "#ffc107"}/>
+                    <FaAt size={40} color = {this.state.showEmailSection ? "#776869" : "#504a4b" }/>
                 </Col>
                 <Col xs="3" onClick={this.showIdSection} className="text__align-center" >
-                    <MdPerson size={40} color ={this.state.showIdSection ? "white" : "#ffc107"}/>
+                    <MdPerson size={40} color ={this.state.showIdSection ? "#776869" : "#504a4b" }/>
                 </Col>
 
                 {/*Login using Employee ID*/}
@@ -113,7 +118,7 @@ class LoginScreen extends React.Component {
                         <Form onSubmit = { this.makeServiceLogin }>
                             <FormGroup>
                                 <FormText className="text__align-center deskbooking__login-text" color="#FBB429">
-                                    Employee ID
+                                    EMPLOYEE ID
                                 </FormText>
                                 <Input className="deskbooking__login-input-box text__align-center" type="text" name="employeeId" value = { this.state.employeeId } onChange={ ( e ) => { this.handleEmployeeLoginDetails( e, "employeeId" ) } } />
                             </FormGroup>
@@ -133,15 +138,15 @@ class LoginScreen extends React.Component {
                     this.state.showEmailSection && 
                     <Row className="justify-content-center deskbooking__login-credentials">
                         <Form onSubmit = { this.makeServiceLogin }>
-                            <FormGroup>
+                            <FormGroup className="deskbooking__login-section" >
                                 <FormText className="text__align-center deskbooking__login-text" color="#FBB429">
-                                    User
+                                    USER
                                 </FormText>
                                 <Input className="deskbooking__login-input-box text__align-center" type="text" name="employeeId" value = { this.state.employeeEmail } onChange={ ( e ) => { this.handleEmployeeLoginDetails( e, "employeeEmail" ) } } />
                             </FormGroup>
-                            <FormGroup>
+                            <FormGroup className="deskbooking__login-section">
                                 <FormText className="text__align-center deskbooking__login-text" color="#FBB429">
-                                    Password
+                                    PASSWORD
                                 </FormText>
                                 <Input className="deskbooking__login-input-box text__align-center" type="password" name="employeeId" value = { this.state.employeePassword } onChange={ ( e ) => { this.handleEmployeeLoginDetails( e, "employeePassword" ) } } />
                             </FormGroup>
@@ -149,7 +154,7 @@ class LoginScreen extends React.Component {
                                 <Row className = "justify-content-center">
                                     <FormGroup>
                                         <Col xs="12" className="text__align-center deskbooking__login-enter" >
-                                            <Button color="danger" size="lg" >Submit</Button>
+                                            <Button color="danger" size="lg" >Login</Button>
                                         </Col>
                                     </FormGroup>
                                 </Row>
@@ -157,9 +162,40 @@ class LoginScreen extends React.Component {
                         </Form> 
                     </Row>
                 }
+                
+                {/*Loader Image*/}
+                { this.state.loginSubmitted && this.props.auth && this.props.auth.loginStatus === "" && 
+                    <Col xs="12" onClick={this.showIdSection} className="text__align-center" >
+                        <img className="loader__png" src= { LoaderIcon } />
+                    </Col>                
+                }
+
+                {/*Login Status Message*/}
+                { this.props.auth && this.props.auth.loginStatus === "2" &&
+                    <Col xs="12" onClick={this.showIdSection} className="text__align-center" >
+                        Incorrect credentials! Please try again.
+                    </Col>                
+                }
+                { this.props.auth && this.props.auth.loginStatus === "1" &&
+                    <Col xs="12" onClick={this.showIdSection} className="text__align-center" >
+                        Success!
+                    </Col>                
+                }
+                { this.props.auth && this.props.auth.loginStatus === "5" &&
+                    <Col xs="12" onClick={this.showIdSection} className="text__align-center" >
+                        Network Error! Please try after some time.
+                    </Col>                
+                }
+
             </Row>
         )
     }
 }
 
-export default LoginScreen;
+const mapStateToProps = ( store ) => {
+    return {
+        auth : store.auth
+    }
+}
+
+export default connect( mapStateToProps )( LoginScreen );

@@ -1,6 +1,6 @@
 import React from "react";
 import DeskBookingLogo from "../../public/images/201559.svg";
-import TCSLogo from "../../public/images/TATA_Consultancy_Services_Logo_white.png";
+import TCSLogo from "../../public/images/TATA_Consultancy_Services_Logo_blue.png";
 import { 
     Row, 
     Container, 
@@ -24,7 +24,6 @@ import {
 import { connect } from "react-redux";
 import moment from 'moment';
 
-import LoadingComponent from "./LoadingPage";
 import LoginScreen from "./LoginScreen";
 import MyBookings from "./MyBookings";
 import AvailableDeskItem from "./AvailableDeskItem";
@@ -35,15 +34,11 @@ import { setZoneFilter, setBuildingFilter, setFloorFilter } from "../actions/fil
 import { getAvailableDesks } from "../actions/desks";
 import selectedDesks from  "../selectors/availableDesks";
 
-import { IoAndroidRefresh } from "react-icons/lib/io";
-
-
 class DeskBooking extends React.Component {
 
     state = {
         minHeight : window.innerHeight,
         contentMinHeight : window.innerHeight - ( 75 + 50 + 60 ),
-        makingServiceLogin : false,
         isFormOpen : false,
         isAddModalOpen : false,
         fromTime : "",
@@ -357,63 +352,45 @@ class DeskBooking extends React.Component {
 
     )
 
-    completeLoginSession = () => {
-
-        this.setState({
-            makingServiceLogin : true
-        });
-
-    }
-
     renderMainContent = () => {
 
-        {/*Login Component*/}
-        if( !this.state.makingServiceLogin ){
-
-            return (
-                <LoginScreen dispatch = { this.props.dispatch } onSubmit = { this.completeLoginSession }/>
-            )
-
-        }
-
-        {/*Loading Component*/}
-        if( this.state.makingServiceLogin && this.props.auth && this.props.auth.loginStatus !== "1" && this.props.auth.loginStatus !== "2" ){
-
-            return(
-                <LoadingComponent height={ this.state.contentMinHeight } width="100%"/>
-            )
-
-        }
-
         {/*User account*/}
+        {/*Should only render booking screen if user has a successful login*/}
+        if( this.props.auth && this.props.auth.loginStatus === "1" ){
+            return (
+                <Row className="justify-content-center deskbooking__userSession-row">
+    
+                    {/*Section to display active bookings*/}
+                    <MyBookings recheckAvailableDesks = { this.checkAvailableDesks }/> 
+    
+                    {/*Section to display 'addBooking' button*/}
+                    { 
+                        this.props.availableDesks.length === 0 && 
+                        <Col xs="12" md="6" className="deskbooking__user-addbooking">
+                            <Button 
+                                color="dark" 
+                                size="lg" 
+                                className="deskbooking__button" 
+                                onClick={ this.toggleFormModal }
+                            >
+                                Check Availability
+                            </Button>
+                        </Col>
+                    }
+    
+                    {/*Section to display Available Desks*/}
+                    {
+                        this.props.availableDesks.length > 0 &&
+                        this.renderAvailableDesks()
+                    }
+    
+                </Row>
+            )
+        }
+
+        {/*Login Component*/}
         return (
-            <Row className="justify-content-center deskbooking__userSession-row">
-
-                {/*Section to display active bookings*/}
-                <MyBookings recheckAvailableDesks = { this.checkAvailableDesks }/> 
-
-                {/*Section to display 'addBooking' button*/}
-                { 
-                    this.props.availableDesks.length === 0 && 
-                    <Col xs="12" md="6" className="deskbooking__user-addbooking">
-                        <Button 
-                            color="light" 
-                            size="lg" 
-                            className="deskbooking__button" 
-                            onClick={ this.toggleFormModal }
-                        >
-                            Check Availability
-                        </Button>
-                    </Col>
-                }
-
-                {/*Section to display Available Desks*/}
-                {
-                    this.props.availableDesks.length > 0 &&
-                    this.renderAvailableDesks()
-                }
-
-            </Row>
+            <LoginScreen dispatch = { this.props.dispatch } onSubmit = { this.completeLoginSession }/>
         )
 
     }

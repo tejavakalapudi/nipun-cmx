@@ -23,8 +23,6 @@ export const getBuildings = ( token, campusId ) => {
             }
         })
         .then( res => {
-    
-            console.log( "Response about buildings", res );
 
             const buildingsByCampusId = res.data.map( ( building ) => {
 
@@ -45,7 +43,7 @@ export const getBuildings = ( token, campusId ) => {
         })
         .catch( error => {
     
-            console.log( "Something went wrong while getting information about buildings", error );
+            console.error( "Something went wrong while getting information about buildings", error );
     
         });
         
